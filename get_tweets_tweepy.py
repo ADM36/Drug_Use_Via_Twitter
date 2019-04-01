@@ -2,7 +2,7 @@ import tweepy
 import json
 import os
 import secret_data
-import sqlite3 as sql
+import sqlite3 as sqlite
 
 # Start getting keys & secrets for running Twitter user, you will need your own user with details saved in a file named 'secret_data.txt' to run this
 CONSUMER_KEY = secret_data.CONSUMER_KEY
@@ -12,7 +12,7 @@ ACCESS_SECRET = secret_data.ACCESS_SECRET
 # End getting keys & secrets for running Twitter user
 
 # Get current dir and train-data dir
-curdir = os.curdir()
+curdir = os.getcwd()
 traindir = curdir + '/train-data'
 
 #Start cache setup
@@ -27,10 +27,10 @@ traindir = curdir + '/train-data'
 #End cache setup
 
 # Start DB setup
-DB_NAME = 'tweets.db'
+DB_NAME = 'tweets.sqlite3'
 create = str(input('Do you want to delete existing tables and recreate database? [y/n]: '))
 if create.lower() == 'y':
-    conn = sql.connect(DB_NAME)
+    conn = sqlite.connect(DB_NAME)
     cur = conn.cursor()
     
     command = '''
@@ -43,12 +43,14 @@ if create.lower() == 'y':
     command = '''
         CREATE TABLE tweets (
         id INTEGER PRIMARY KEY,
-        tweepy_object BLOB
+        tweepy_object TEXT
         )
     '''
     cur.execute(command)
     conn.commit()
     conn.close()
+
+    print('Table created')
 
 # Start OAuth code
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -81,8 +83,8 @@ def get_tweet(found_id):
         # fw.write(dumped_json_cache)
         # fw.close() # close the open file
         # return CACHE_DICTION[found_id]
-    conn = sql.connect(DB_NAME)
-    cur = conn.connect()
+    conn = sqlite.connect(DB_NAME)
+    cur = conn.cursor()
     
     command = '''
         SELECT EXISTS(SELECT 1 FROM tweets WHERE id = ?)
@@ -95,14 +97,16 @@ def get_tweet(found_id):
             SELECT tweepy_object FROM tweets WHERE id = ?
         '''
         cur.execute(command, (found_id,))
-        text = cur.fetchone()[0].text
+        text = json.loads(cur.fetchone()[0])['text']
     else:
         resp = api.get_status(found_id)
+        json_str = json.dumps(resp._json)
+        json_obj = json.loads(json_str)
         command = '''
             INSERT INTO tweets (id, tweepy_object) VALUES (?, ?)
         '''
-        cur.execute(command, (found_id, resp))
-        text = resp.text
+        cur.execute(command, (found_id, json_str))
+        text = json_obj['text']
     
     conn.commit()
     conn.close()
@@ -117,8 +121,8 @@ def get_tweet(found_id):
 def read_in_tweet_ids():
     with open(FILENAME, 'r') as infile:
         for line in infile:
-            found_id = line.split('\t')[0]
-            found_mention = line.split('\t')[2]
+            found_id = line.split('\t')[0].replace('\n', '')
+            found_mention = line.split('\t')[2].replace('\n', '')
             dir = traindir + '/%s' % (found_mention)
             file = dir + '/%s.txt' % (found_id)
             try:
@@ -130,4 +134,4 @@ def read_in_tweet_ids():
                 print(e)
 
 if __name__ == "__main__":
-    check = read_in_tweet_ids()
+    read_in_tweet_ids()
