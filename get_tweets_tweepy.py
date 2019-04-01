@@ -134,4 +134,4 @@ def read_in_tweet_ids():
                 print(e)
 
 if __name__ == "__main__":
-    read_in_tweet_ids()
+    read_in_tweet_ids() # Should all work now
