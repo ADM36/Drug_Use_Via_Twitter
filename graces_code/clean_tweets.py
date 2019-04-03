@@ -8,16 +8,18 @@ from nltk.tokenize import TweetTokenizer
 
 data = []
 target = []
+id = []
 for line in open('task1_training_no_utf.tsv'):
     line_sep = line.split('\t')
 
     data.append(line_sep[3])
     target.append(line_sep[2])
+    id.append(line_sep[0])
 
 
 text_processor = TextPreProcessor(
     # terms that will be normalized
-    normalize=['url', 'email', 'percent', 'money', 'phone',
+    normalize=['url', 'email', 'money', 'phone',
         'time', 'date'],
     # terms that will be annotated
     annotate={"hashtag", "allcaps", "elongated", "repeated",
@@ -72,6 +74,14 @@ for tweet in data:
     except:
         None
 
+    match = re.findall(r"(\d+.?\d?%)", tweet)
+
+    try:
+        for percent in match:
+            tweet = tweet.replace(percent, '<percent> ' + percent[0:len(percent)-1] + ' </percent>')
+    except:
+        None
+
     # deal with contractions that the tool misses
     tweet = re.sub(r"(\b)([Ww]hat|[Ii]t|[Hh]e|[Ss]he|[Tt]hat|[Tt]here|[Hh]ow|[Ww]ho|[Hh]ere|[Ww]here|[Ww]hen)'s", r"\1\2 is", tweet)
     tweet = re.sub(r"(\b)([Aa]in)'t", r"is not", tweet)
@@ -92,7 +102,7 @@ with open('task1_training_cleaned.tsv', mode='w') as tsvfile:
 
     index = 0
     for tweet in clean_tweets:
-        tsvwriter.writerow([target[index], tweet])
+        tsvwriter.writerow([id[index], target[index], tweet])
 
         index += 1
 tsvfile.close()
