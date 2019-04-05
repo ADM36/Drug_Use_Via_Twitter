@@ -4,17 +4,13 @@ import pandas as pd
 DRUGS_LIST = []
 DRUGS_DIC = {}
 
-
+#DATA FROM FDA
 drug_file = pd.read_csv("drug_names_cleaned.csv")
 
 print(drug_file.head())
 
-#for drug in drug_file['PROPRIETARYNAME']:
-#    if drug not in DRUGS_DIC:
-#        DRUGS_DIC[drug] = []
-#    else:
-#        pass
 
+# CREATING A DICTIONARY, DRUGS_DIC, WHOSE KEYS ARE THE PROPRITARY NAME OF A DRUG, AND WHOSE VALUES ARE NONPROPRIETARY NAMES FOR THAT SAME DRUG
 # iterate over rows with iterrows()
 for index, row in drug_file.iterrows():
     if row['PROPRIETARYNAME'] not in DRUGS_DIC:
@@ -22,4 +18,4 @@ for index, row in drug_file.iterrows():
     else:
         pass
 
-print(DRUGS_DIC)
+#print(DRUGS_DIC)
