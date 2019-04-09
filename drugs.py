@@ -14,8 +14,28 @@ print(drug_file.head())
 # iterate over rows with iterrows()
 for index, row in drug_file.iterrows():
     if row['PROPRIETARYNAME'] not in DRUGS_DIC:
-        DRUGS_DIC[row['PROPRIETARYNAME']] = [row['NONPROPRIETARYNAME']]
+        DRUGS_DIC[row['PROPRIETARYNAME']] = [row['PROPRIETARYNAME'], str(row['PROPRIETARYNAME']).lower(),
+        str(row['PROPRIETARYNAME']).upper(), row['NONPROPRIETARYNAME']]
     else:
         pass
 
+drugs_data = pd.DataFrame(DRUGS_DIC.items())
+drugs_data_final = pd.DataFrame(drugs_data[1].values.tolist())
+
+columns = ["PROPRIETARYNAME", "Lower", "UPPER", "NONPROPRIETARYNAME"]
+
+drugs_data_final.to_csv('final_drugs.csv', index=False, header = columns)
+
+print(drugs_data_final.head())
 #print(DRUGS_DIC)
+#
+# for index, row in drug_file.iterrows():
+#     if str(row['PROPRIETARYNAME']).lower() not in DRUGS_LIST:
+#         DRUGS_LIST.append(str(row['PROPRIETARYNAME']).lower())
+#     if row['NONPROPRIETARYNAME']:
+#         if row['NONPROPRIETARYNAME'] not in DRUGS_LIST:
+#             DRUGS_LIST.append(row['NONPROPRIETARYNAME'])
+#         else:
+#             pass
+#
+# print(DRUGS_LIST.head())

@@ -39,7 +39,11 @@ patient_data.columns = ['adverse_reaction', 'LLT_code']
 PATIENT_FRIENDLY_DIC = {}
 for index, row in patient_data.iterrows():
     if row['adverse_reaction'] not in ADVERSE_DIC:
-        PATIENT_FRIENDLY_DIC[row['adverse_reaction']] = [row['LLT_code']]
+        PATIENT_FRIENDLY_DIC[row['adverse_reaction'].lower()] = [row['LLT_code']]
     else:
         pass
 #print(PATIENT_FRIENDLY_DIC)
+
+adverse_data = pd.DataFrame(PATIENT_FRIENDLY_DIC.items())
+columns = ['adverse', 'LLT']
+adverse_data.to_csv('final_adverse.csv', index=False, header = columns)
